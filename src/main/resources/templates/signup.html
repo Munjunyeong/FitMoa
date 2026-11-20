@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>회원가입 · 핏모아(FitMoa)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth">
+  <aside class="auth-side">
+    <div class="brand"><span class="brand-mark">F</span> 핏모아(FitMoa)</div>
+    <div>
+      <h2>흩어진 돈의 흐름,<br>한 곳에서 가볍게.</h2>
+      <p>계좌, 지출, 저축 목표까지. 가입하고 나만의 자산 관리를 시작해 보세요.</p>
+    </div>
+    <div class="float">
+      <small>이번 달 저축 달성률</small>
+      <b>72%</b>
+      <div class="bar" style="margin-top:14px;background:rgba(255,255,255,.2)"><i style="width:72%;background:#fff"></i></div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="brand mobile-brand"><span class="brand-mark" style="background:var(--primary);color:#fff">F</span> 핏모아(FitMoa)</div>
+      <h1>회원가입</h1>
+      <p class="sub">1분이면 가입이 끝나요.</p>
+
+      <!-- <div class="alert" th:if="${error}">이미 사용 중인 아이디입니다.</div> -->
+
+      <form action="signup" method="post" data-next="login">
+        <div class="field">
+          <label for="name">이름</label>
+          <input class="input" id="name" name="name" placeholder="홍길동" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="username">아이디</label>
+          <input class="input" id="username" name="username" placeholder="영문, 숫자 4자 이상" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <input class="input" type="password" id="password" name="password" placeholder="8자 이상, 영문+숫자 조합" required autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="password2">비밀번호 확인</label>
+          <input class="input" type="password" id="password2" name="passwordConfirm" placeholder="비밀번호를 한 번 더 입력" required autocomplete="new-password">
+          <span class="hint">비밀번호가 서로 일치해야 해요.</span>
+        </div>
+        <div class="field">
+          <label for="phone">전화번호</label>
+          <input class="input" type="tel" id="phone" name="phone"
+          maxlength="13" placeholder="010-1234-5678" required>
+        </div>
+
+        <label class="check"><input type="checkbox" required> <span>(필수) 이용약관 및 개인정보 처리방침에 동의합니다.</span></label>
+
+        <button class="btn btn-primary btn-block" style="margin-top:10px" type="submit">가입하기</button>
+      </form>
+
+      <p class="foot">이미 계정이 있나요? <a href="login">로그인</a></p>
+    </div>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
+

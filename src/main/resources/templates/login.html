@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로그인 · 핏모아(FitMoa)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth">
+  <aside class="auth-side">
+    <div class="brand"><span class="brand-mark">F</span> 핏모아(FitMoa)</div>
+    <div>
+      <h2>돌아오신 걸<br>환영해요.</h2>
+      <p>내 계좌와 소비, 저축 목표를 한눈에 확인해 보세요.</p>
+    </div>
+    <div class="float">
+      <small>총 자산</small>
+      <b class="num">8,432,100원</b>
+      <small style="display:block;margin-top:10px">지난달보다 +312,000원</small>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="brand mobile-brand"><span class="brand-mark" style="background:var(--primary);color:#fff">F</span> 핏모아(FitMoa)</div>
+      <h1>로그인</h1>
+      <p class="sub">계정 정보를 입력해 주세요.</p>
+
+      <!-- <div class="alert" th:if="${param.error}">아이디 또는 비밀번호가 올바르지 않습니다.</div> -->
+
+      <form action="/login" method="post">
+        <div class="field">
+          <label for="username">아이디</label>
+          <input class="input" id="id" name="id"
+       placeholder="아이디를 입력하세요" required>
+        </div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <input class="input" type="password" id="password" name="password"
+       placeholder="비밀번호를 입력하세요" required>
+        </div>
+
+        <label class="check"><input type="checkbox" name="remember"> <span>로그인 상태 유지</span></label>
+
+        <button class="btn btn-primary btn-block" style="margin-top:10px" type="submit">로그인</button>
+      </form>
+
+      <p class="foot">아직 계정이 없나요? <a href="signup">회원가입</a></p>
+    </div>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
+

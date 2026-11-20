@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.asset.flow.bank.BankMapper">
+	<select id="findAllByOwner"	resultType="com.asset.flow.bank.BankAccount">
+		SELECT BANK_ACCOUNT_ID AS bankAccountId, ID AS id, BANK_NAME AS bankName,
+		BALANCE AS balance, ACCOUNT_TYPE AS accountType
+		FROM BANK_ACCOUNT
+		WHERE ID = #{ownerId}
+		ORDER BY BANK_NAME, BANK_ACCOUNT_ID
+	</select>
+
+	<select id="findOwned"	resultType="com.asset.flow.bank.BankAccount">
+		SELECT BANK_ACCOUNT_ID AS bankAccountId, ID AS id, BANK_NAME AS bankName,
+		BALANCE AS balance, ACCOUNT_TYPE AS accountType
+		FROM BANK_ACCOUNT
+		WHERE BANK_ACCOUNT_ID = #{bankAccountId} AND ID = #{ownerId}
+	</select>
+
+	<insert id="insert">
+		INSERT INTO BANK_ACCOUNT (BANK_ACCOUNT_ID, ID, BANK_NAME, BALANCE,
+		ACCOUNT_TYPE)
+		VALUES (#{bankAccountId}, #{id}, #{bankName}, #{balance}, #{accountType})
+	</insert>
+
+	<update id="updateOwned">
+		UPDATE BANK_ACCOUNT
+		SET BANK_NAME = #{bankName}, BALANCE = #{balance}, ACCOUNT_TYPE =
+		#{accountType}
+		WHERE BANK_ACCOUNT_ID = #{bankAccountId} AND ID = #{id}
+	</update>
+
+	<delete id="deleteOwned">
+		DELETE FROM BANK_ACCOUNT
+		WHERE BANK_ACCOUNT_ID = #{bankAccountId} AND ID = #{ownerId}
+	</delete>
+</mapper>
