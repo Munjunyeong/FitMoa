@@ -1,139 +1,62 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>계좌 상세 · 핏모아(FitMoa)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../../static/style.css" th:href="@{/style.css}">
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">F</span> 핏모아(FitMoa)</div>
     <nav class="nav">
-      <a href="/banking/accounts" class="active"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
-      <a href="/banking/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
+      <a href="/bank" class="active"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
+      <a href="/bank/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
       <a href="/expenses"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>가계부</a>
       <a href="/goals"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>저축함</a>
     </nav>
     <div class="side-foot">
-      <div class="me"><span class="avatar">홍</span><div><b>홍길동</b><small>gildong</small></div></div>
-      <form action="logout">
-        <button class="logout" type="submit"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</button>
-      </form>
+      <div class="me"><span class="avatar">F</span><div><b>핏모아</b><small>내 자산 관리</small></div></div>
+      <a class="logout" href="/logout"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</a>
     </div>
   </aside>
 
   <main class="main">
-    <a class="back" href="/banking/accounts"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>내 계좌</a>
+    <a class="back" href="/bank"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>내 계좌</a>
 
-    <section class="hero">
-      <div>
-        <small>생활비 통장 · 머니은행 110-482-337201</small>
-        <div class="big num">3,284,500원</div>
-      </div>
-      <div class="actions">
-        <button class="btn" data-dialog="dlg-deposit"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>입금</button>
-        <button class="btn" data-dialog="dlg-withdraw"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>출금</button>
-        <a class="btn solid" href="/banking/transfer?from=1"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
-      </div>
+    <section class="card empty" th:if="${bankAccount == null}">
+      <h1>계좌가 없습니다</h1>
+      <p>요청한 계좌를 찾을 수 없거나 현재 계정에 등록된 계좌가 아닙니다.</p>
+      <a class="btn btn-primary" href="/bank" style="margin-top:16px">계좌 목록으로</a>
     </section>
 
-    <section class="card" style="margin-top:22px">
-      <div class="card-title">
-        거래내역
-        <div class="filters" style="margin:0">
-          <a class="chip on" href="#">전체</a>
-          <a class="chip" href="#">입금</a>
-          <a class="chip" href="#">출금</a>
+    <div th:if="${bankAccount != null}">
+      <section class="hero">
+        <div>
+          <small th:text="|${bankAccount.bankName} · ${bankAccount.accountType}|">은행명 · 계좌 종류</small>
+          <div class="big num" th:text="|${#numbers.formatInteger(bankAccount.balance, 1, 'POINT')}원|">0원</div>
+          <small style="display:block;margin-top:8px" th:text="|계좌 ID · ${bankAccount.bankAccountId}|">계좌 ID</small>
         </div>
-      </div>
+        <div class="actions">
+          <a class="btn solid" th:href="@{/bank/{id}/edit(id=${bankAccount.bankAccountId})}">계좌 정보 수정</a>
+        </div>
+      </section>
 
-      <div class="day-label">오늘</div>
-      <div class="tx">
-        <div class="tx-ic out"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
-        <div class="tx-body"><b>김민수</b><small>이체 · 점심 정산</small></div>
-        <div class="tx-amt out num">-23,000원<small>3,284,500원</small></div>
-      </div>
+      <section class="card" style="margin-top:22px">
+        <div class="card-title">계좌 정보</div>
+        <div class="sum-row"><span>은행명</span><b th:text="${bankAccount.bankName}">은행명</b></div>
+        <div class="sum-row"><span>계좌 종류</span><b th:text="${bankAccount.accountType}">계좌 종류</b></div>
+        <div class="sum-row"><span>현재 잔액</span><b class="num" th:text="|${#numbers.formatInteger(bankAccount.balance, 1, 'POINT')}원|">0원</b></div>
+      </section>
 
-      <div class="day-label">11월 19일</div>
-      <div class="tx">
-        <div class="tx-ic in"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
-        <div class="tx-body"><b>입금</b><small>월급 통장 → 생활비 통장</small></div>
-        <div class="tx-amt in num">+500,000원<small>3,307,500원</small></div>
-      </div>
-      <div class="tx">
-        <div class="tx-ic out"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
-        <div class="tx-body"><b>출금</b><small>ATM 현금 인출</small></div>
-        <div class="tx-amt out num">-100,000원<small>2,807,500원</small></div>
-      </div>
-
-      <div class="day-label">11월 15일</div>
-      <div class="tx">
-        <div class="tx-ic out"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
-        <div class="tx-body"><b>박서연</b><small>이체 · 모임 회비</small></div>
-        <div class="tx-amt out num">-50,000원<small>2,907,500원</small></div>
-      </div>
-      <div class="tx">
-        <div class="tx-ic in"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
-        <div class="tx-body"><b>이정훈</b><small>이체 입금 · 정산</small></div>
-        <div class="tx-amt in num">+35,000원<small>2,957,500원</small></div>
-      </div>
-
-      <div class="day-label">11월 3일</div>
-      <div class="tx">
-        <div class="tx-ic in"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
-        <div class="tx-body"><b>계좌 개설 입금</b><small>초기 입금</small></div>
-        <div class="tx-amt in num">+2,922,500원<small>2,922,500원</small></div>
-      </div>
-    </section>
+      <section class="card" style="margin-top:22px">
+        <div class="card-title">거래 내역</div>
+        <div class="empty">거래 내역 조회 기능은 아직 연결되지 않았습니다.</div>
+      </section>
+    </div>
   </main>
 </div>
-
-<!-- 입금 모달 -->
-<dialog class="modal" id="dlg-deposit">
-  <form action="/banking/accounts/1/deposit" method="post" data-next="account-detail.html">
-    <h3>입금하기</h3>
-    <p class="sub">생활비 통장으로 입금할 금액을 입력하세요.</p>
-    <div class="field">
-      <div class="input-wrap"><input class="input input-lg" type="number" id="dep-amt" name="amount" min="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
-      <div class="chips">
-        <button type="button" class="chip" data-add="10000" data-target="#dep-amt">+1만</button>
-        <button type="button" class="chip" data-add="50000" data-target="#dep-amt">+5만</button>
-        <button type="button" class="chip" data-add="100000" data-target="#dep-amt">+10만</button>
-      </div>
-    </div>
-    <div class="field"><input class="input" name="memo" placeholder="메모 (선택)" maxlength="30"></div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" data-close>취소</button>
-      <button type="submit" class="btn btn-primary">입금하기</button>
-    </div>
-  </form>
-</dialog>
-
-<!-- 출금 모달 -->
-<dialog class="modal" id="dlg-withdraw">
-  <form action="/banking/accounts/1/withdraw" method="post" data-next="account-detail.html">
-    <h3>출금하기</h3>
-    <p class="sub">출금 가능 금액 <b class="num">3,284,500원</b></p>
-    <div class="field">
-      <div class="input-wrap"><input class="input input-lg" type="number" id="wd-amt" name="amount" min="1" max="3284500" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
-      <div class="chips">
-        <button type="button" class="chip" data-add="10000" data-target="#wd-amt">+1만</button>
-        <button type="button" class="chip" data-add="50000" data-target="#wd-amt">+5만</button>
-        <button type="button" class="chip" data-add="100000" data-target="#wd-amt">+10만</button>
-        <button type="button" class="chip" data-add="all" data-all="3284500" data-target="#wd-amt">전액</button>
-      </div>
-    </div>
-    <div class="field"><input class="input" name="memo" placeholder="메모 (선택)" maxlength="30"></div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" data-close>취소</button>
-      <button type="submit" class="btn btn-danger">출금하기</button>
-    </div>
-  </form>
-</dialog>
-<script src="app.js"></script>
 </body>
 </html>
-

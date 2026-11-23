@@ -1,177 +1,85 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>저축함 · 핏모아(FitMoa)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../static/style.css" th:href="@{/style.css}">
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">F</span> 핏모아(FitMoa)</div>
+    <a class="brand" href="/bank"><span class="brand-mark">F</span> 핏모아(FitMoa)</a>
     <nav class="nav">
-      <a href="/banking/accounts"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
+      <a href="/bank"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
       <a href="/banking/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
       <a href="/expenses"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>가계부</a>
       <a href="/goals" class="active"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>저축함</a>
     </nav>
-    <div class="side-foot">
-      <div class="me"><span class="avatar">홍</span><div><b>홍길동</b><small>gildong</small></div></div>
-      <form action="/accounts/logout" method="post" data-next="login.html">
-        <button class="logout" type="submit"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</button>
-      </form>
+    <div class="side-foot"><div class="me"><span class="avatar">F</span><div><b>핏모아</b><small>내 자산 관리</small></div></div>
+      <a class="logout" href="/logout"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</a>
     </div>
   </aside>
-
   <main class="main">
-    <div class="page-head">
-      <div>
-        <h1>목표 저축함</h1>
-        <p>목표를 정하고 조금씩 모아 보세요.</p>
-      </div>
+    <p class="note" th:if="${message}" th:text="${message}" role="status"></p>
+    <p class="alert" th:if="${error}" th:text="${error}" role="alert"></p>
+    <div class="page-head"><div><h1>목표 저축함</h1><p>목표를 정하고 조금씩 모아 보세요.</p></div>
       <a href="/goals/new" class="btn btn-primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>저축함 만들기</a>
     </div>
-
     <section class="stats">
-      <div class="stat"><small>모은 금액</small><b class="num">3,150,000원</b><span class="muted">저축함 3개</span></div>
-      <div class="stat"><small>전체 목표 금액</small><b class="num">8,500,000원</b><span class="in">전체 달성률 37%</span></div>
-      <div class="stat"><small>가장 가까운 기한</small><b>D-42</b><span class="muted">노트북 구매</span></div>
+      <div class="stat"><small>모은 금액</small><b class="num" th:text="|${#numbers.formatInteger(currentTotal, 1, 'POINT')}원|">0원</b><span class="muted" th:text="|저축함 ${#lists.size(goals)}개|">저축함 0개</span></div>
+      <div class="stat"><small>전체 목표 금액</small><b class="num" th:text="|${#numbers.formatInteger(targetTotal, 1, 'POINT')}원|">0원</b><span class="in" th:text="|전체 달성률 ${overallProgress}%|">전체 달성률 0%</span></div>
+      <div class="stat"><small>가장 가까운 기한</small>
+        <b th:if="${nearestGoal != null}" th:text="${nearestGoal.daysRemaining == 0 ? '오늘' : (nearestGoal.daysRemaining > 0 ? 'D-' + nearestGoal.daysRemaining : '기한 지남')}">D-0</b>
+        <b th:unless="${nearestGoal != null}">없음</b>
+        <span class="muted" th:if="${nearestGoal != null}" th:text="${nearestGoal.goalTitle}">목표</span><span class="muted" th:unless="${nearestGoal != null}">등록된 목표가 없습니다.</span>
+      </div>
     </section>
-
     <section class="goal-grid">
-
-      <article class="goal" style="--c:#2f6bff">
+      <div class="empty" style="grid-column:1/-1" th:if="${#lists.isEmpty(goals)}">아직 저축 목표가 없습니다. 첫 목표를 만들어 보세요.</div>
+      <article class="goal" th:each="goal,stat : ${goals}" th:classappend="${goal.currentAmount >= goal.targetAmount} ? ' done' : ''">
         <div class="goal-top">
-          <div class="ring" style="--v:80;--c:#2f6bff"><b>80%</b></div>
-          <div>
-            <h3>✈️ 일본 여행</h3>
-            <div class="meta"><span class="badge blue">D-96</span><span class="badge">2027.02.24</span></div>
-          </div>
+          <div class="ring" th:style="|--v:${goal.progressPercentage};--c:#2f6bff|"><b th:text="|${goal.progressPercentage}%|">0%</b></div>
+          <div><h3 th:text="${goal.goalTitle}">저축 목표</h3><div class="meta">
+            <span class="badge" th:classappend="${goal.daysRemaining < 0} ? ' red' : (${goal.daysRemaining <= 45} ? ' red' : ' blue')"
+                  th:text="${goal.daysRemaining == 0 ? '오늘 마감' : (goal.daysRemaining > 0 ? 'D-' + goal.daysRemaining : '기한 지남')}">D-0</span>
+            <span class="badge" th:text="${#temporals.format(goal.endDate, 'yyyy.MM.dd')}">기한</span>
+          </div></div>
         </div>
-        <div>
-          <div class="goal-amt"><b class="num">1,600,000원</b><span class="num">/ 2,000,000원</span></div>
-          <div class="bar" style="margin-top:10px"><i style="width:80%;background:#2f6bff"></i></div>
+        <div><div class="goal-amt"><b class="num" th:text="|${#numbers.formatInteger(goal.currentAmount, 1, 'POINT')}원|">0원</b><span class="num" th:text="|/ ${#numbers.formatInteger(goal.targetAmount, 1, 'POINT')}원|">/ 0원</span></div>
+          <div class="bar" style="margin-top:10px"><i style="width:0;background:#2f6bff" th:style="|width:${goal.progressPercentage}%;background:#2f6bff|"></i></div>
         </div>
         <div class="goal-actions">
-          <button class="btn btn-soft" data-dialog="dlg-goal" data-action="/goals/1/deposit" data-title="적립하기" data-name="✈️ 일본 여행" data-label="적립하기">적립</button>
-          <button class="btn btn-ghost" data-dialog="dlg-goal-out" data-action="/goals/1/withdraw" data-title="출금하기" data-name="✈️ 일본 여행">출금</button>
+          <button class="btn btn-soft" type="button" data-dialog="dlg-goal" th:attr="data-action=@{/goals/{id}/deposit(id=${goal.goalId})},data-name=${goal.goalTitle}">적립</button>
+          <button class="btn btn-ghost" type="button" data-dialog="dlg-goal-out" th:attr="data-action=@{/goals/{id}/withdraw(id=${goal.goalId})},data-name=${goal.goalTitle}">출금</button>
+          <a class="btn btn-ghost" th:href="@{/goals/{id}/edit(id=${goal.goalId})}">수정</a>
+          <form th:action="@{/goals/{id}/delete(id=${goal.goalId})}" method="post" data-confirm="이 저축 목표를 삭제할까요?">
+            <button class="btn btn-ghost" type="submit">삭제</button>
+          </form>
         </div>
       </article>
-
-      <article class="goal">
-        <div class="goal-top">
-          <div class="ring" style="--v:35;--c:#7c5cff"><b>35%</b></div>
-          <div>
-            <h3>💻 노트북 구매</h3>
-            <div class="meta"><span class="badge red">D-42</span><span class="badge">2027.01.01</span></div>
-          </div>
-        </div>
-        <div>
-          <div class="goal-amt"><b class="num">700,000원</b><span class="num">/ 2,000,000원</span></div>
-          <div class="bar" style="margin-top:10px"><i style="width:35%;background:#7c5cff"></i></div>
-        </div>
-        <div class="goal-actions">
-          <button class="btn btn-soft" data-dialog="dlg-goal" data-action="/goals/2/deposit" data-name="💻 노트북 구매">적립</button>
-          <button class="btn btn-ghost" data-dialog="dlg-goal-out" data-action="/goals/2/withdraw" data-name="💻 노트북 구매">출금</button>
-        </div>
-      </article>
-
-      <article class="goal">
-        <div class="goal-top">
-          <div class="ring" style="--v:17;--c:#12b5cb"><b>17%</b></div>
-          <div>
-            <h3>🏠 전세 보증금</h3>
-            <div class="meta"><span class="badge blue">D-420</span><span class="badge">2028.01.14</span></div>
-          </div>
-        </div>
-        <div>
-          <div class="goal-amt"><b class="num">850,000원</b><span class="num">/ 5,000,000원</span></div>
-          <div class="bar" style="margin-top:10px"><i style="width:17%;background:#12b5cb"></i></div>
-        </div>
-        <div class="goal-actions">
-          <button class="btn btn-soft" data-dialog="dlg-goal" data-action="/goals/3/deposit" data-name="🏠 전세 보증금">적립</button>
-          <button class="btn btn-ghost" data-dialog="dlg-goal-out" data-action="/goals/3/withdraw" data-name="🏠 전세 보증금">출금</button>
-        </div>
-      </article>
-
-      <!-- 목표 달성 상태 -->
-      <article class="goal done">
-        <div class="goal-top">
-          <div class="ring" style="--v:100;--c:#0a9d6b"><b>100%</b></div>
-          <div>
-            <h3>🎁 부모님 선물</h3>
-            <div class="meta"><span class="badge green">🎉 달성 완료</span><span class="badge">2026.12.01</span></div>
-          </div>
-        </div>
-        <div>
-          <div class="goal-amt"><b class="num">500,000원</b><span class="num">/ 500,000원</span></div>
-          <div class="bar" style="margin-top:10px"><i style="width:100%;background:#0a9d6b"></i></div>
-        </div>
-        <div class="goal-actions">
-          <button class="btn btn-soft" disabled style="opacity:.45;cursor:not-allowed">적립</button>
-          <button class="btn btn-ghost" data-dialog="dlg-goal-out" data-action="/goals/4/withdraw" data-name="🎁 부모님 선물">출금</button>
-        </div>
-      </article>
-
     </section>
   </main>
 </div>
-
-<!-- 적립 모달 -->
 <dialog class="modal" id="dlg-goal">
-  <form action="/goals/1/deposit" method="post" data-next="goals.html">
-    <h3>적립하기</h3>
-    <p class="sub" data-fill="name">저축함</p>
-    <div class="field">
-      <div class="input-wrap"><input class="input input-lg" type="number" id="g-dep" name="amount" min="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
-      <div class="chips">
-        <button type="button" class="chip" data-add="10000" data-target="#g-dep">+1만</button>
-        <button type="button" class="chip" data-add="50000" data-target="#g-dep">+5만</button>
-        <button type="button" class="chip" data-add="100000" data-target="#g-dep">+10만</button>
-      </div>
-    </div>
-    <div class="field"><label for="g-src">출금 계좌</label>
-      <select class="select" id="g-src" name="accountId">
-        <option value="1">생활비 통장 · 3,284,500원</option>
-        <option value="2">월급 통장 · 2,147,600원</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" data-close>취소</button>
-      <button type="submit" class="btn btn-primary">적립하기</button>
-    </div>
+  <form action="/goals/0/deposit" method="post">
+    <h3>적립하기</h3><p class="sub" data-fill="name">저축 목표</p>
+    <div class="field"><label for="goal-deposit">적립 금액</label><div class="input-wrap"><input class="input input-lg" type="number" id="goal-deposit" name="amount" min="1" step="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
+      <div class="chips"><button type="button" class="chip" data-add="10000" data-target="#goal-deposit">+1만</button><button type="button" class="chip" data-add="50000" data-target="#goal-deposit">+5만</button><button type="button" class="chip" data-add="100000" data-target="#goal-deposit">+10만</button></div>
+    </div><p class="hint">적립은 저축 목표의 현재 금액에 반영됩니다.</p>
+    <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>취소</button><button type="submit" class="btn btn-primary">적립하기</button></div>
   </form>
 </dialog>
-
-<!-- 출금 모달 -->
 <dialog class="modal" id="dlg-goal-out">
-  <form action="/goals/1/withdraw" method="post" data-next="goals.html">
-    <h3>출금하기</h3>
-    <p class="sub" data-fill="name">저축함</p>
-    <div class="field">
-      <div class="input-wrap"><input class="input input-lg" type="number" id="g-out" name="amount" min="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
-      <div class="chips">
-        <button type="button" class="chip" data-add="10000" data-target="#g-out">+1만</button>
-        <button type="button" class="chip" data-add="50000" data-target="#g-out">+5만</button>
-        <button type="button" class="chip" data-add="100000" data-target="#g-out">+10만</button>
-      </div>
-    </div>
-    <div class="field"><label for="g-dst">입금 계좌</label>
-      <select class="select" id="g-dst" name="accountId">
-        <option value="1">생활비 통장</option>
-        <option value="2">월급 통장</option>
-      </select>
-    </div>
-    <div class="note" style="margin:0 0 16px"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>출금하면 목표 달성률이 낮아질 수 있어요.</span></div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" data-close>취소</button>
-      <button type="submit" class="btn btn-danger">출금하기</button>
-    </div>
+  <form action="/goals/0/withdraw" method="post">
+    <h3>출금하기</h3><p class="sub" data-fill="name">저축 목표</p>
+    <div class="field"><label for="goal-withdraw">출금 금액</label><div class="input-wrap"><input class="input input-lg" type="number" id="goal-withdraw" name="amount" min="1" step="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
+      <div class="chips"><button type="button" class="chip" data-add="10000" data-target="#goal-withdraw">+1만</button><button type="button" class="chip" data-add="50000" data-target="#goal-withdraw">+5만</button><button type="button" class="chip" data-add="100000" data-target="#goal-withdraw">+10만</button></div>
+    </div><p class="hint">출금하면 목표 달성률이 낮아집니다.</p>
+    <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>취소</button><button type="submit" class="btn btn-danger">출금하기</button></div>
   </form>
 </dialog>
-<script src="app.js"></script>
+<script src="../static/app.js" th:src="@{/app.js}"></script>
 </body>
 </html>
-

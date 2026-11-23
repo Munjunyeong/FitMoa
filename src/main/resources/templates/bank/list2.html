@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>내 계좌 · 핏모아(FitMoa)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="../../static/style.css" th:href="@{/style.css}">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <a class="brand" href="/bank"><span class="brand-mark">F</span> 핏모아(FitMoa)</a>
+    <nav class="nav">
+      <a href="/bank" class="active"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
+      <a href="/banking/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
+      <a href="/expenses"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>가계부</a>
+      <a href="/goals"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>저축함</a>
+    </nav>
+    <div class="side-foot">
+      <div class="me"><span class="avatar">F</span><div><b>핏모아</b><small>내 자산 관리</small></div></div>
+      <a class="logout" href="/logout"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <p class="note" th:if="${message}" th:text="${message}" role="status"></p>
+    <p class="alert" th:if="${error}" th:text="${error}" role="alert"></p>
+    <div class="page-head">
+      <div>
+        <h1>내 계좌</h1>
+        <p>보유 중인 계좌와 잔액을 확인하세요.</p>
+      </div>
+      <a href="/bank/new" class="btn btn-primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>계좌 등록</a>
+    </div>
+
+    <section class="hero">
+      <div>
+        <small>등록된 계좌</small>
+        <div class="big" th:text="|${#lists.size(accounts)}개|">0개</div>
+        <small style="display:block;margin-top:6px">계좌 정보를 한곳에서 관리하세요.</small>
+      </div>
+    </section>
+
+    <div class="card empty" th:if="${#lists.isEmpty(accounts)}">
+      <p>등록된 계좌가 없습니다.</p>
+      <a href="/bank/new" class="btn btn-primary" style="margin-top:14px">첫 계좌 등록하기</a>
+    </div>
+
+    <section class="acct-list" th:unless="${#lists.isEmpty(accounts)}">
+      <article class="bank-entry" th:each="account, stat : ${accounts}">
+        <a class="acct-card c1"
+           th:classappend="${stat.index % 4 == 1 ? 'c2' : (stat.index % 4 == 2 ? 'c3' : (stat.index % 4 == 3 ? 'c4' : ''))}"
+           th:href="@{/bank/{id}(id=${account.bankAccountId})}">
+          <div class="top">
+            <div>
+              <div class="nm" th:text="${account.bankName}">은행명</div>
+              <div class="no" th:text="${account.accountType}">계좌 종류</div>
+            </div>
+            <span class="tag">계좌 상세</span>
+          </div>
+          <div class="bal">
+            <small>현재 잔액</small>
+            <b class="num" th:text="|${#numbers.formatInteger(account.balance, 1, 'POINT')}원|">0원</b>
+          </div>
+        </a>
+        <div class="bank-actions">
+          <a class="btn btn-ghost btn-sm" th:href="@{/bank/{id}/edit(id=${account.bankAccountId})}">수정</a>
+          <form th:action="@{/bank/{id}/delete(id=${account.bankAccountId})}" method="post" data-confirm="이 계좌를 삭제할까요?">
+            <button class="btn btn-danger btn-sm" type="submit">삭제</button>
+          </form>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+<script src="../../static/app.js" th:src="@{/app.js}"></script>
+</body>
+</html>

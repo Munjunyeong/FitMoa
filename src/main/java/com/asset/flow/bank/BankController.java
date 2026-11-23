@@ -60,7 +60,8 @@ public class BankController {
 			model.addAttribute("bankAccount", bankService.getAccount(bankAccountId, ownerId));
 			return "bank/detail";
 		} catch (IllegalArgumentException e) {
-			return "redirect:/bank";
+			model.addAttribute("bankAccount", null);
+			return "bank/detail";
 		}
 	}
 
@@ -112,3 +113,4 @@ public class BankController {
 		return (String) session.getAttribute(LOGIN_ACCOUNT_ID_KEY);
 	}
 }
+

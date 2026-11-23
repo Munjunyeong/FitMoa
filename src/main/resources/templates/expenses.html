@@ -1,119 +1,90 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>가계부 · 핏모아(FitMoa)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../static/style.css" th:href="@{/style.css}">
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">F</span> 핏모아(FitMoa)</div>
+    <a class="brand" href="/bank"><span class="brand-mark">F</span> 핏모아(FitMoa)</a>
     <nav class="nav">
-      <a href="/banking/accounts"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
+      <a href="/bank"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
       <a href="/banking/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
       <a href="/expenses" class="active"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>가계부</a>
       <a href="/goals"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>저축함</a>
     </nav>
     <div class="side-foot">
-      <div class="me"><span class="avatar">홍</span><div><b>홍길동</b><small>gildong</small></div></div>
-      <form action="/accounts/logout" method="post" data-next="login.html">
-        <button class="logout" type="submit"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</button>
-      </form>
+      <div class="me"><span class="avatar">F</span><div><b>핏모아</b><small>내 자산 관리</small></div></div>
+      <a class="logout" href="/logout"><svg class="i" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>로그아웃</a>
     </div>
   </aside>
 
   <main class="main">
+    <p class="note" th:if="${message}" th:text="${message}" role="status"></p>
+    <p class="alert" th:if="${error}" th:text="${error}" role="alert"></p>
     <div class="page-head">
-      <div>
-        <h1>가계부</h1>
-        <p>이번 달 소비를 카테고리별로 확인하세요.</p>
-      </div>
+      <div><h1>가계부</h1><p>월별 지출 내역과 카테고리 합계를 확인하세요.</p></div>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
         <div class="month-nav">
-          <a href="#"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></a>
-          <b>2026년 11월</b>
-          <a href="#"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+          <a th:href="@{/expenses(month=${previousMonth})}" aria-label="이전 달"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></a>
+          <b th:text="${monthLabel}">월</b>
+          <a th:href="@{/expenses(month=${nextMonth})}" aria-label="다음 달"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
         </div>
         <a href="/expenses/new" class="btn btn-primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>지출 등록</a>
       </div>
     </div>
 
     <section class="stats">
-      <div class="stat"><small>이번 달 총 지출</small><b class="num">1,284,500원</b><span class="out">전월 대비 +8.2%</span></div>
-      <div class="stat"><small>일 평균 지출</small><b class="num">64,225원</b><span class="muted">20일 기준</span></div>
-      <div class="stat"><small>가장 많이 쓴 곳</small><b>🍚 식비</b><span class="muted">488,100원</span></div>
+      <div class="stat"><small>월 총 지출</small><b class="num" th:text="|${#numbers.formatInteger(totalAmount, 1, 'POINT')}원|">0원</b><span class="muted" th:text="|${expenseCount}건 기록|">0건 기록</span></div>
+      <div class="stat"><small>일 평균 지출</small><b class="num" th:text="|${#numbers.formatInteger(dailyAverage, 1, 'POINT')}원|">0원</b><span class="muted">선택한 달의 경과 일수 기준</span></div>
+      <div class="stat"><small>가장 많이 쓴 카테고리</small>
+        <b th:if="${topCategory != null}" th:text="${topCategory.categoryName}">카테고리</b>
+        <b th:unless="${topCategory != null}">없음</b>
+        <span class="muted" th:if="${topCategory != null}" th:text="|${#numbers.formatInteger(topCategory.totalAmount, 1, 'POINT')}원|">0원</span>
+        <span class="muted" th:unless="${topCategory != null}">아직 등록된 지출이 없습니다.</span>
+      </div>
     </section>
 
     <section class="card" style="margin-top:22px">
       <div class="card-title">카테고리별 지출</div>
-      <div class="donut-wrap">
-        <div class="donut"><div><small>총 지출</small><b class="num">128만원</b></div></div>
-        <div class="legend">
-          <div class="lg"><i style="background:#2f6bff"></i><span>🍚 식비</span><b class="num">488,100원</b><span class="pct">38%</span></div>
-          <div class="lg"><i style="background:#7c5cff"></i><span>🛍 쇼핑</span><b class="num">282,600원</b><span class="pct">22%</span></div>
-          <div class="lg"><i style="background:#12b5cb"></i><span>🚌 교통</span><b class="num">154,100원</b><span class="pct">12%</span></div>
-          <div class="lg"><i style="background:#f5a524"></i><span>🏠 주거/통신</span><b class="num">192,700원</b><span class="pct">15%</span></div>
-          <div class="lg"><i style="background:#f04452"></i><span>🎬 문화/여가</span><b class="num">102,800원</b><span class="pct">8%</span></div>
-          <div class="lg"><i style="background:#94a3b8"></i><span>📦 기타</span><b class="num">64,200원</b><span class="pct">5%</span></div>
+      <div class="empty" th:if="${#lists.isEmpty(categories)}">이 달에는 등록된 지출이 없습니다.</div>
+      <div class="legend" th:unless="${#lists.isEmpty(categories)}">
+        <div th:each="category : ${categories}" style="margin-bottom:8px">
+          <div class="lg">
+            <i style="background:#2f6bff"></i>
+            <span th:text="${category.categoryName}">카테고리</span>
+            <b class="num" th:text="|${#numbers.formatInteger(category.totalAmount, 1, 'POINT')}원|">0원</b>
+            <span class="pct" th:text="|${category.percentage}%|">0%</span>
+          </div>
+          <div class="bar" style="margin:5px 44px 0 22px"><i style="width:0" th:style="|width:${category.percentage}%|"/></div>
         </div>
       </div>
     </section>
 
     <section class="card" style="margin-top:22px">
       <div class="card-title">지출 내역</div>
-
-      <div class="day-label">오늘 · 11월 20일</div>
-      <div class="tx">
-        <div class="tx-ic">🍚</div>
-        <div class="tx-body"><b>점심 - 김밥천국</b><small><span class="pill-cat">식비</span>생활비 통장</small></div>
-        <div class="tx-amt out num">-9,500원</div>
-        <form action="/expenses/1/delete" method="post" data-next="expenses.html" data-confirm="이 지출 내역을 삭제할까요?">
-          <button class="btn-icon" type="submit" aria-label="삭제"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
-        </form>
-      </div>
-      <div class="tx">
-        <div class="tx-ic">🚌</div>
-        <div class="tx-body"><b>지하철 · 버스</b><small><span class="pill-cat">교통</span>생활비 통장</small></div>
-        <div class="tx-amt out num">-2,950원</div>
-        <form action="/expenses/2/delete" method="post" data-next="expenses.html" data-confirm="이 지출 내역을 삭제할까요?">
-          <button class="btn-icon" type="submit" aria-label="삭제"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
-        </form>
-      </div>
-
-      <div class="day-label">11월 19일</div>
-      <div class="tx">
-        <div class="tx-ic">🛍</div>
-        <div class="tx-body"><b>겨울 코트</b><small><span class="pill-cat">쇼핑</span>월급 통장</small></div>
-        <div class="tx-amt out num">-189,000원</div>
-        <form action="/expenses/3/delete" method="post" data-next="expenses.html" data-confirm="이 지출 내역을 삭제할까요?">
-          <button class="btn-icon" type="submit" aria-label="삭제"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
-        </form>
-      </div>
-      <div class="tx">
-        <div class="tx-ic">🎬</div>
-        <div class="tx-body"><b>영화 예매</b><small><span class="pill-cat">문화/여가</span>생활비 통장</small></div>
-        <div class="tx-amt out num">-28,000원</div>
-        <form action="/expenses/4/delete" method="post" data-next="expenses.html" data-confirm="이 지출 내역을 삭제할까요?">
-          <button class="btn-icon" type="submit" aria-label="삭제"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
-        </form>
-      </div>
-
-      <div class="day-label">11월 17일</div>
-      <div class="tx">
-        <div class="tx-ic">🏠</div>
-        <div class="tx-body"><b>휴대폰 요금</b><small><span class="pill-cat">주거/통신</span>월급 통장</small></div>
-        <div class="tx-amt out num">-62,700원</div>
-        <form action="/expenses/5/delete" method="post" data-next="expenses.html" data-confirm="이 지출 내역을 삭제할까요?">
+      <div class="empty" th:if="${#lists.isEmpty(expenses)}">표시할 지출 내역이 없습니다.</div>
+      <div class="tx" th:each="expense : ${expenses}">
+        <div class="tx-ic out">₩</div>
+        <div class="tx-body">
+          <b th:text="${expense.categoryName}">카테고리</b>
+          <small th:text="${expense.spentAt}">날짜</small>
+        </div>
+        <div class="tx-amt out num" th:text="|−${#numbers.formatInteger(expense.amount, 1, 'POINT')}원|">−0원</div>
+        <a class="btn btn-ghost btn-sm" th:href="@{/expenses/{id}/edit(id=${expense.expenseId})}">수정</a>
+        <form th:action="@{/expenses/{id}/delete(id=${expense.expenseId})}" method="post" data-confirm="이 지출 내역을 삭제할까요?">
+          <input type="hidden" name="month" th:value="${month}">
           <button class="btn-icon" type="submit" aria-label="삭제"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
         </form>
       </div>
     </section>
   </main>
 </div>
-<script src="app.js"></script>
+<script src="../static/app.js" th:src="@{/app.js}"></script>
 </body>
 </html>
 

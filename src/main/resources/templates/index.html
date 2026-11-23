@@ -26,30 +26,30 @@
   <div class="sec">
     <h2>① account</h2>
     <div class="links" th:if="${session['LOGIN_ACCOUNT_ID'] == null}">
-      <a href="/signup"><div><b>회원가입</b><small>계정 가입</small></div><code>/signup</code></a>
-      <a href="/login"><div><b>로그인</b><small>계정 로그인</small></div><code>/login</code></a>
+      <a href="/signup"><div><b>회원가입</b><small>계정 가입</small></div><code></code></a>
+      <a href="/login"><div><b>로그인</b><small>계정 로그인</small></div><code></code></a>
     </div>
     <div class="links" th:if="${session['LOGIN_ACCOUNT_ID'] != null}">
-      <a href="/account/profile"><div><b>내 프로필</b><small>계정 정보 확인</small></div><code>/account/profile</code></a>
-      <a href="/logout"><div><b>로그아웃</b><small>로그인 세션 종료</small></div><code>/logout</code></a>
+      <a href="/account/profile"><div><b>내 프로필</b><small>계정 정보 확인</small></div><code></code></a>
+      <a href="/logout"><div><b>로그아웃</b><small>로그인 세션 종료</small></div><code></code></a>
     </div>
   </div>
 
   <div class="sec"><h2>② banking</h2><div class="links">
-    <a href="/bank"><div><b>내 계좌</b><small>bank/list</small></div><code>/bank</code></a>
-    <a href="/bank/new"><div><b>계좌 개설</b><small>bank/form</small></div><code>/bank/new</code></a>
-    <a href="/bank"><div><b>계좌 상세</b><small>계좌 목록에서 계좌를 선택하세요</small></div><code>/bank/{id}</code></a>
-    <a href="/banking/transfer"><div><b>계좌 이체</b><small>이체 화면</small></div><code>/banking/transfer</code></a>
+    <a href="/bank"><div><b>내 계좌</b><small>bank/list</small></div><code></code></a>
+    <a href="/bank/new"><div><b>계좌 개설</b><small>bank/form</small></div><code></code></a>
+    <a href="/bank"><div><b>계좌 상세</b><small>계좌 목록에서 계좌를 선택하세요</small></div><code></code></a>
+    <a href="/bank/transfer"><div><b>계좌 이체</b><small>이체 화면</small></div><code></code></a>
   </div></div>
 
   <div class="sec"><h2>③ expense</h2><div class="links">
-    <a href="/expenses"><div><b>가계부 · 통계</b><small>지출 내역 화면</small></div><code>/expenses</code></a>
-    <a href="/expenses/new"><div><b>지출 등록</b><small>지출 등록 화면</small></div><code>/expenses/new</code></a>
+    <a href="/expenses"><div><b>가계부 · 통계</b><small>지출 내역 화면</small></div><code></code></a>
+    <a href="/expenses/new"><div><b>지출 등록</b><small>지출 등록 화면</small></div><code></code></a>
   </div></div>
 
   <div class="sec"><h2>④ goal</h2><div class="links">
-    <a href="/goals"><div><b>저축함 · 적립/출금 모달</b><small>저축 목표 화면</small></div><code>/goals</code></a>
-    <a href="/goals/new"><div><b>저축함 생성</b><small>저축함 생성 화면</small></div><code>/goals/new</code></a>
+    <a href="/goals"><div><b>저축함 · 적립/출금 모달</b><small>저축 목표 화면</small></div><code></code></a>
+    <a href="/goals/new"><div><b>저축함 생성</b><small>저축함 생성 화면</small></div><code></code></a>
   </div></div>
 </div>
 </body>
