@@ -48,4 +48,12 @@ public class AccountDaoImpl implements AccountDao {
 		return sqlSession.selectOne(NAMESPACE + "item", id);
 	}
 
+	@Override
+	public int updatePassword(String id, String passwordHash) {
+		Account account = new Account();
+		account.setId(id);
+		account.setPassword(passwordHash);
+		return sqlSession.update(NAMESPACE + "updatePassword", account);
+	}
+
 }

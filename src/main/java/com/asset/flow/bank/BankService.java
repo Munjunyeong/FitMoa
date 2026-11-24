@@ -12,4 +12,8 @@ public interface BankService {
 	void updateAccount(String bankAccountId, String ownerId, BankAccount form);
 
 	void deleteAccount(String bankAccountId, String ownerId);
+
+	List<AccountHistory> getHistory(String bankAccountId, String ownerId);
+
+	void transfer(String ownerId, String fromAccountId, String toAccountId, long amount, String memo);
 }

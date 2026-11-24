@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
@@ -34,6 +35,7 @@ public class BankController {
 		form.setBalance(0L);
 		model.addAttribute("bankAccount", form);
 		model.addAttribute("pageTitle", "계좌 등록");
+		model.addAttribute("isNew", true);
 		model.addAttribute("formAction", "/bank");
 		return "bank/form";
 	}
@@ -58,6 +60,7 @@ public class BankController {
 		if (ownerId == null) return "redirect:/login";
 		try {
 			model.addAttribute("bankAccount", bankService.getAccount(bankAccountId, ownerId));
+			model.addAttribute("history", bankService.getHistory(bankAccountId, ownerId));
 			return "bank/detail";
 		} catch (IllegalArgumentException e) {
 			model.addAttribute("bankAccount", null);
@@ -72,10 +75,38 @@ public class BankController {
 		try {
 			model.addAttribute("bankAccount", bankService.getAccount(bankAccountId, ownerId));
 			model.addAttribute("pageTitle", "계좌 수정");
+			model.addAttribute("isNew", false);
 			model.addAttribute("formAction", "/bank/" + bankAccountId + "/edit");
 			return "bank/form";
 		} catch (IllegalArgumentException e) {
 			return "redirect:/bank";
+		}
+	}
+
+	@GetMapping("/transfer")
+	public String transferForm(HttpSession session, Model model) {
+		String ownerId = ownerId(session);
+		if (ownerId == null) return "redirect:/login";
+		model.addAttribute("accounts", bankService.getAccounts(ownerId));
+		return "bank/transfer";
+	}
+
+	@PostMapping("/transfer")
+	public String transfer(HttpSession session,
+			@RequestParam String fromAccountId,
+			@RequestParam String toAccountId,
+			@RequestParam long amount,
+			@RequestParam(required = false) String memo,
+			RedirectAttributes redirect) {
+		String ownerId = ownerId(session);
+		if (ownerId == null) return "redirect:/login";
+		try {
+			bankService.transfer(ownerId, fromAccountId, toAccountId, amount, memo);
+			redirect.addFlashAttribute("message", "계좌 이체가 완료되었습니다.");
+			return "redirect:/bank";
+		} catch (IllegalArgumentException e) {
+			redirect.addFlashAttribute("error", e.getMessage());
+			return "redirect:/bank/transfer";
 		}
 	}
 

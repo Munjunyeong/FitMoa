@@ -20,7 +20,6 @@
 		resultType="com.asset.flow.account.Account">
 		SELECT
 		ID AS id,
-		PASSWORD AS password,
 		NAME AS name,
 		PHONE AS phone,
 		CREATED_AT AS createdAt
@@ -35,11 +34,16 @@
 
 	<update id="updateAccount">
 		UPDATE ACCOUNT
-		SET
-		NAME = #{name},
-		PHONE = #{phone},
-		PASSWORD = #{password}
+		<set>
+			<if test="name != null">NAME = #{name},</if>
+			<if test="phone != null">PHONE = #{phone},</if>
+			<if test="password != null">PASSWORD = #{password},</if>
+		</set>
 		WHERE ID = #{id}
+	</update>
+
+	<update id="updatePassword">
+		UPDATE ACCOUNT SET PASSWORD = #{password} WHERE ID = #{id}
 	</update>
 
 	<delete id="deleteById">

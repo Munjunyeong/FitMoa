@@ -61,7 +61,7 @@
           </div>
           <div class="bal">
             <small>현재 잔액</small>
-            <b class="num" th:text="|${#numbers.formatInteger(account.balance, 1, 'POINT')}원|">0원</b>
+            <b class="num" th:text="|${#numbers.formatInteger(account.balance, 1, 'COMMA')}원|">0원</b>
           </div>
         </a>
         <div class="bank-actions">

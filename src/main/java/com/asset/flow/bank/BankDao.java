@@ -12,4 +12,12 @@ public interface BankDao {
 	int updateOwned(BankAccount bankAccount);
 
 	int deleteOwned(String bankAccountId, String ownerId);
+
+	List<AccountHistory> findHistory(String bankAccountId, String ownerId);
+
+	int debit(String bankAccountId, String ownerId, long amount);
+
+	int credit(String bankAccountId, String ownerId, long amount);
+
+	int insertHistory(AccountHistory history);
 }

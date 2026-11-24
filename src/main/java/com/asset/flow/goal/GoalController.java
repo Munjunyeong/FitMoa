@@ -13,19 +13,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import com.asset.flow.bank.BankService;
 
 @Controller
 @RequestMapping("/goals")
 public class GoalController {
     private static final String LOGIN_ACCOUNT_ID_KEY = "LOGIN_ACCOUNT_ID";
     private final GoalService goalService;
-    public GoalController(GoalService goalService) { this.goalService = goalService; }
+    private final BankService bankService;
+    public GoalController(GoalService goalService, BankService bankService) { this.goalService = goalService; this.bankService = bankService; }
 
     @GetMapping
     public String list(HttpSession session, Model model) {
         String ownerId = ownerId(session);
         if (ownerId == null) return "redirect:/login";
         List<Goal> goals = goalService.getGoals(ownerId);
+        model.addAttribute("accounts", bankService.getAccounts(ownerId));
         long currentTotal = goals.stream().mapToLong(Goal::getCurrentAmount).sum();
         long targetTotal = goals.stream().mapToLong(Goal::getTargetAmount).sum();
         Goal nearest = goals.stream().filter(g -> g.getDaysRemaining() >= 0)
@@ -80,18 +83,22 @@ public class GoalController {
     }
 
     @PostMapping("/{goalId}/deposit")
-    public String deposit(@PathVariable Long goalId, HttpSession session, @RequestParam long amount, RedirectAttributes redirect) {
-        return changeAmount(goalId, session, amount, true, redirect);
+    public String deposit(@PathVariable Long goalId, HttpSession session, @RequestParam long amount,
+                          @RequestParam String bankAccountId, RedirectAttributes redirect) {
+        return changeAmount(goalId, session, bankAccountId, amount, true, redirect);
     }
     @PostMapping("/{goalId}/withdraw")
-    public String withdraw(@PathVariable Long goalId, HttpSession session, @RequestParam long amount, RedirectAttributes redirect) {
-        return changeAmount(goalId, session, amount, false, redirect);
+    public String withdraw(@PathVariable Long goalId, HttpSession session, @RequestParam long amount,
+                           @RequestParam String bankAccountId, RedirectAttributes redirect) {
+        return changeAmount(goalId, session, bankAccountId, amount, false, redirect);
     }
-    private String changeAmount(Long goalId, HttpSession session, long amount, boolean deposit, RedirectAttributes redirect) {
+    private String changeAmount(Long goalId, HttpSession session, String bankAccountId, long amount,
+                                boolean deposit, RedirectAttributes redirect) {
         String ownerId = ownerId(session);
         if (ownerId == null) return "redirect:/login";
         try {
-            if (deposit) goalService.deposit(goalId, ownerId, amount); else goalService.withdraw(goalId, ownerId, amount);
+            if (deposit) goalService.deposit(goalId, ownerId, bankAccountId, amount);
+            else goalService.withdraw(goalId, ownerId, bankAccountId, amount);
             redirect.addFlashAttribute("message", deposit ? "목표 금액에 적립했습니다." : "목표 금액에서 출금했습니다.");
         } catch (IllegalArgumentException e) { redirect.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/goals";

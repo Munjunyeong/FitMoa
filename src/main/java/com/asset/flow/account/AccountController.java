@@ -54,8 +54,13 @@ public class AccountController {
 		if (id == null) {
 			return "redirect:/login";
 		}
-		accountService.updateAccount(id, accountForm);
-		redirectAttributes.addFlashAttribute("message", "계정 정보가 수정되었습니다.");
+		try {
+			accountService.updateAccount(id, accountForm);
+			redirectAttributes.addFlashAttribute("message", "계정 정보가 수정되었습니다.");
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("error", e.getMessage());
+			return "redirect:/account/profile/edit";
+		}
 		return "redirect:/account/profile";
 	}
 

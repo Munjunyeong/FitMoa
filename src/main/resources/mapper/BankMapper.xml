@@ -27,10 +27,38 @@
 
 	<update id="updateOwned">
 		UPDATE BANK_ACCOUNT
-		SET BANK_NAME = #{bankName}, BALANCE = #{balance}, ACCOUNT_TYPE =
-		#{accountType}
+		SET BANK_NAME = #{bankName}, ACCOUNT_TYPE = #{accountType}
 		WHERE BANK_ACCOUNT_ID = #{bankAccountId} AND ID = #{id}
 	</update>
+
+	<select id="findHistory" resultType="com.asset.flow.bank.AccountHistory">
+		SELECT H.HISTORY_ID AS historyId, H.BANK_ACCOUNT_ID AS bankAccountId,
+		       H.TX_TYPE AS txType, H.AMOUNT AS amount,
+		       H.COUNTERPARTY_ACCOUNT_ID AS counterpartyAccountId,
+		       H.BALANCE_AFTER AS balanceAfter, H.TX_MEMO AS txMemo, H.CREATED_AT AS createdAt
+		FROM ACCOUNT_HISTORY H
+		JOIN BANK_ACCOUNT B ON B.BANK_ACCOUNT_ID = H.BANK_ACCOUNT_ID
+		WHERE H.BANK_ACCOUNT_ID = #{bankAccountId} AND B.ID = #{ownerId}
+		ORDER BY H.CREATED_AT DESC, H.HISTORY_ID DESC
+		LIMIT 50
+	</select>
+
+	<update id="debit">
+		UPDATE BANK_ACCOUNT SET BALANCE = BALANCE - #{amount}
+		WHERE BANK_ACCOUNT_ID = #{bankAccountId} AND ID = #{ownerId} AND BALANCE &gt;= #{amount}
+	</update>
+
+	<update id="credit">
+		UPDATE BANK_ACCOUNT SET BALANCE = BALANCE + #{amount}
+		WHERE BANK_ACCOUNT_ID = #{bankAccountId} AND ID = #{ownerId}
+		  AND BALANCE &lt;= 9223372036854775807 - #{amount}
+	</update>
+
+	<insert id="insertHistory" useGeneratedKeys="true" keyProperty="historyId" keyColumn="HISTORY_ID">
+		INSERT INTO ACCOUNT_HISTORY
+		(BANK_ACCOUNT_ID, TX_TYPE, AMOUNT, COUNTERPARTY_ACCOUNT_ID, BALANCE_AFTER, TX_MEMO, CREATED_AT)
+		VALUES (#{bankAccountId}, #{txType}, #{amount}, #{counterpartyAccountId}, #{balanceAfter}, #{txMemo}, #{createdAt})
+	</insert>
 
 	<delete id="deleteOwned">
 		DELETE FROM BANK_ACCOUNT

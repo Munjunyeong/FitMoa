@@ -60,10 +60,10 @@
     p = p.split('?')[0];
     if (p === '/accounts/signup') return 'signup.html';
     if (p === '/accounts/login') return 'login.html';
-    if (p === '/banking/accounts') return 'accounts.html';
-    if (p === '/banking/accounts/new') return 'account-form.html';
-    if (/^\/banking\/accounts\/\d+$/.test(p)) return 'account-detail.html';
-    if (p === '/banking/transfer') return 'transfer.html';
+    if (p === '/bank') return 'list.html';
+    if (p === '/bank/new') return 'form.html';
+    if (/^\/bank\/[^/]+$/.test(p)) return 'detail.html';
+    if (p === '/bank/transfer') return 'transfer.html';
     if (p === '/expenses') return 'expenses.html';
     if (p === '/expenses/new') return 'expense-form.html';
     if (p === '/goals') return 'goals.html';

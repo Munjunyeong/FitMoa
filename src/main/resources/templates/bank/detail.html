@@ -36,7 +36,7 @@
       <section class="hero">
         <div>
           <small th:text="|${bankAccount.bankName} · ${bankAccount.accountType}|">은행명 · 계좌 종류</small>
-          <div class="big num" th:text="|${#numbers.formatInteger(bankAccount.balance, 1, 'POINT')}원|">0원</div>
+          <div class="big num" th:text="|${#numbers.formatInteger(bankAccount.balance, 1, 'COMMA')}원|">0원</div>
           <small style="display:block;margin-top:8px" th:text="|계좌 ID · ${bankAccount.bankAccountId}|">계좌 ID</small>
         </div>
         <div class="actions">
@@ -48,12 +48,23 @@
         <div class="card-title">계좌 정보</div>
         <div class="sum-row"><span>은행명</span><b th:text="${bankAccount.bankName}">은행명</b></div>
         <div class="sum-row"><span>계좌 종류</span><b th:text="${bankAccount.accountType}">계좌 종류</b></div>
-        <div class="sum-row"><span>현재 잔액</span><b class="num" th:text="|${#numbers.formatInteger(bankAccount.balance, 1, 'POINT')}원|">0원</b></div>
+        <div class="sum-row"><span>현재 잔액</span><b class="num" th:text="|${#numbers.formatInteger(bankAccount.balance, 1, 'COMMA')}원|">0원</b></div>
       </section>
 
       <section class="card" style="margin-top:22px">
-        <div class="card-title">거래 내역</div>
-        <div class="empty">거래 내역 조회 기능은 아직 연결되지 않았습니다.</div>
+        <div class="card-title">최근 거래 내역</div>
+        <div class="empty" th:if="${#lists.isEmpty(history)}">등록된 거래 내역이 없습니다.</div>
+        <div style="overflow-x:auto" th:unless="${#lists.isEmpty(history)}">
+          <table style="min-width:720px;width:100%;border-collapse:collapse;text-align:left"><thead><tr><th style="padding:10px">일시</th><th style="padding:10px">유형</th><th style="padding:10px">메모</th><th style="padding:10px">금액</th><th style="padding:10px">거래 후 잔액</th></tr></thead>
+            <tbody><tr th:each="item : ${history}">
+              <td th:text="${#temporals.format(item.createdAt, 'yyyy.MM.dd HH:mm')}">일시</td>
+              <td th:text="${item.txType}">유형</td>
+              <td th:text="${item.txMemo != null and !item.txMemo.isBlank() ? item.txMemo : (item.counterpartyAccountId != null ? item.counterpartyAccountId : '-')}">메모</td>
+              <td class="num" th:text="|${#numbers.formatInteger(item.amount, 1, 'COMMA')}원|">0원</td>
+              <td class="num" th:text="|${#numbers.formatInteger(item.balanceAfter, 1, 'COMMA')}원|">0원</td>
+            </tr></tbody>
+          </table>
+        </div>
       </section>
     </div>
   </main>

@@ -13,7 +13,7 @@
     <a class="brand" href="/bank"><span class="brand-mark">F</span> 핏모아(FitMoa)</a>
     <nav class="nav">
       <a href="/bank"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>계좌</a>
-      <a href="/banking/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
+      <a href="/bank/transfer"><svg class="i" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>이체</a>
       <a href="/expenses"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>가계부</a>
       <a href="/goals" class="active"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>저축함</a>
     </nav>
@@ -28,8 +28,8 @@
       <a href="/goals/new" class="btn btn-primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>저축함 만들기</a>
     </div>
     <section class="stats">
-      <div class="stat"><small>모은 금액</small><b class="num" th:text="|${#numbers.formatInteger(currentTotal, 1, 'POINT')}원|">0원</b><span class="muted" th:text="|저축함 ${#lists.size(goals)}개|">저축함 0개</span></div>
-      <div class="stat"><small>전체 목표 금액</small><b class="num" th:text="|${#numbers.formatInteger(targetTotal, 1, 'POINT')}원|">0원</b><span class="in" th:text="|전체 달성률 ${overallProgress}%|">전체 달성률 0%</span></div>
+      <div class="stat"><small>모은 금액</small><b class="num" th:text="|${#numbers.formatInteger(currentTotal, 1, 'COMMA')}원|">0원</b><span class="muted" th:text="|저축함 ${#lists.size(goals)}개|">저축함 0개</span></div>
+      <div class="stat"><small>전체 목표 금액</small><b class="num" th:text="|${#numbers.formatInteger(targetTotal, 1, 'COMMA')}원|">0원</b><span class="in" th:text="|전체 달성률 ${overallProgress}%|">전체 달성률 0%</span></div>
       <div class="stat"><small>가장 가까운 기한</small>
         <b th:if="${nearestGoal != null}" th:text="${nearestGoal.daysRemaining == 0 ? '오늘' : (nearestGoal.daysRemaining > 0 ? 'D-' + nearestGoal.daysRemaining : '기한 지남')}">D-0</b>
         <b th:unless="${nearestGoal != null}">없음</b>
@@ -47,7 +47,7 @@
             <span class="badge" th:text="${#temporals.format(goal.endDate, 'yyyy.MM.dd')}">기한</span>
           </div></div>
         </div>
-        <div><div class="goal-amt"><b class="num" th:text="|${#numbers.formatInteger(goal.currentAmount, 1, 'POINT')}원|">0원</b><span class="num" th:text="|/ ${#numbers.formatInteger(goal.targetAmount, 1, 'POINT')}원|">/ 0원</span></div>
+        <div><div class="goal-amt"><b class="num" th:text="|${#numbers.formatInteger(goal.currentAmount, 1, 'COMMA')}원|">0원</b><span class="num" th:text="|/ ${#numbers.formatInteger(goal.targetAmount, 1, 'COMMA')}원|">/ 0원</span></div>
           <div class="bar" style="margin-top:10px"><i style="width:0;background:#2f6bff" th:style="|width:${goal.progressPercentage}%;background:#2f6bff|"></i></div>
         </div>
         <div class="goal-actions">
@@ -67,7 +67,9 @@
     <h3>적립하기</h3><p class="sub" data-fill="name">저축 목표</p>
     <div class="field"><label for="goal-deposit">적립 금액</label><div class="input-wrap"><input class="input input-lg" type="number" id="goal-deposit" name="amount" min="1" step="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
       <div class="chips"><button type="button" class="chip" data-add="10000" data-target="#goal-deposit">+1만</button><button type="button" class="chip" data-add="50000" data-target="#goal-deposit">+5만</button><button type="button" class="chip" data-add="100000" data-target="#goal-deposit">+10만</button></div>
-    </div><p class="hint">적립은 저축 목표의 현재 금액에 반영됩니다.</p>
+    </div>
+    <div class="field"><label for="deposit-account">출금 계좌</label><select class="select" id="deposit-account" name="bankAccountId" required><option value="">계좌를 선택해 주세요</option><option th:each="account : ${accounts}" th:value="${account.bankAccountId}" th:text="|${account.bankName} · ${#numbers.formatInteger(account.balance, 1, 'COMMA')}원|">계좌</option></select></div>
+    <p class="hint">선택한 계좌에서 출금하고 목표 금액과 거래 내역에 함께 반영합니다.</p>
     <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>취소</button><button type="submit" class="btn btn-primary">적립하기</button></div>
   </form>
 </dialog>
@@ -76,7 +78,9 @@
     <h3>출금하기</h3><p class="sub" data-fill="name">저축 목표</p>
     <div class="field"><label for="goal-withdraw">출금 금액</label><div class="input-wrap"><input class="input input-lg" type="number" id="goal-withdraw" name="amount" min="1" step="1" placeholder="0" required><span class="unit" style="right:18px">원</span></div>
       <div class="chips"><button type="button" class="chip" data-add="10000" data-target="#goal-withdraw">+1만</button><button type="button" class="chip" data-add="50000" data-target="#goal-withdraw">+5만</button><button type="button" class="chip" data-add="100000" data-target="#goal-withdraw">+10만</button></div>
-    </div><p class="hint">출금하면 목표 달성률이 낮아집니다.</p>
+    </div>
+    <div class="field"><label for="withdraw-account">입금 계좌</label><select class="select" id="withdraw-account" name="bankAccountId" required><option value="">계좌를 선택해 주세요</option><option th:each="account : ${accounts}" th:value="${account.bankAccountId}" th:text="|${account.bankName} · ${#numbers.formatInteger(account.balance, 1, 'COMMA')}원|">계좌</option></select></div>
+    <p class="hint">목표 금액에서 출금해 선택한 계좌로 입금합니다.</p>
     <div class="modal-actions"><button type="button" class="btn btn-ghost" data-close>취소</button><button type="submit" class="btn btn-danger">출금하기</button></div>
   </form>
 </dialog>
